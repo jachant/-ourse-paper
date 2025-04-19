@@ -1,0 +1,1 @@
+pip install evaluate rouge_score git+https://github.com/google-research/bleurt.git bert_score openai  datasets
