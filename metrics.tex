@@ -1,0 +1,206 @@
+\newpage
+\section*{Роль метрик в задачах генерации текста}
+
+Суммаризация кода — автоматическое создание кратких описаний фрагментов кода на естественном языке. Для оценки качества используются две категории метрик:
+
+\begin{enumerate}
+    \item Традиционные NLP-метрики (BLEU, ROUGE, METEOR).
+    \item Специализированные метрики для кода (CodeBLEU, BERTScore).
+\end{enumerate}
+
+Каждая метрика имеет уникальные алгоритмы, ограничения и области применения.
+
+\subsection*{4.1 BLEU (Bilingual Evaluation Understudy)}
+
+\textbf{Принцип работы:} \\
+BLEU оценивает совпадение n-грамм между сгенерированным текстом и эталоном. Формула:
+\[
+BLEU = BP \cdot \exp\left(\sum_{n=1}^{N} w_n \log p_n\right),
+\]
+где:
+
+    
+- $BP$ — штраф за короткие описания (Brevity Penalty).
+    
+- $p_n$ — точность для n-грамм.
+    
+- $w_n$ — веса (обычно $w_1 = w_2 = 0.5$).
+
+
+\textbf{Применение:}
+
+    
+- Используется в CodeXGLUE и CodeSearchNet для документации.
+    
+- Пример: В CodeBERT (2020) BLEU-4 для Python составил 24.3 (средний результат).
+
+
+\textbf{Плюсы:}
+
+    
+- Простота расчета.
+    
+- Широкое распространение в NLP.
+
+
+\textbf{Минусы:}
+
+    
+- Не учитывает семантику (например, "sort list" vs "order elements").
+    
+- Игнорирует структуру кода.
+
+
+\textbf{Актуальность:} \\
+BLEU остается стандартом, но часто комбинируется с другими метриками.
+
+\subsection*{4.2 ROUGE (Recall-Oriented Understudy for Gisting Evaluation)}
+
+\textbf{Расчет:} \\
+ROUGE фокусируется на полноте совпадений:
+
+    
+- ROUGE-L: Совпадение наибольшей общей подпоследовательности (LCS).
+    
+- ROUGE-N: Аналог BLEU, но с акцентом на recall.
+
+
+\textbf{Использование:}
+
+    
+- Применяется в CodeSearchNet для поиска.
+    
+- Пример: ROUGE-L для Go (Husain et al., 2019) — 0.41 (хороший результат).
+
+
+\textbf{Критерии:}
+
+    
+- >0.5 — высокое качество.
+    
+- <0.2 — неудовлетворительно.
+
+
+\textbf{Ограничения:} \\
+Не анализирует смысловой контекст.
+
+\subsection*{4.3 METEOR}
+
+\textbf{Принцип работы:} \\
+METEOR сравнивает тексты через семантические сети и вычисляет точность/отклик. Формула:
+\[
+METEOR = \frac{\sum_{w \in generated} \max_{syn(w)} match(w)}{|reference|}.
+\]
+
+\textbf{Применение:} \\
+Используется в XLCoST для мультиязычных моделей [[8]].
+
+\textbf{Пример:} \\
+В работе [[8]] METEOR применялся для оценки генерации музыки.
+
+\subsection*{4.4 CodeBLEU: Специализированная метрика}
+
+\textbf{Особенности:} \\
+CodeBLEU (2021) дополняет BLEU:
+\begin{enumerate}
+    \item Совпадение абстрактных синтаксических деревьев (AST).
+    \item Учет ключевых слов ("if", "for").
+    \item Семантическая близость через векторизацию.
+\end{enumerate}
+
+Формула:
+\[
+CodeBLEU = 0.4 \cdot BLEU + 0.3 \cdot AST + 0.2 \cdot Keywords + 0.1 \cdot Semantic.
+\]
+
+\textbf{Преимущества:}
+
+    
+- Учитывает синтаксис и семантику.
+    
+- Лучше коррелирует с человеческой оценкой.
+
+
+\textbf{Примеры:}
+
+    
+- Модели с CodeBLEU >35 считаются конкурентоспособными.
+    
+- Низкокачественные модели имеют значения 10–15.
+
+
+\subsection*{4.5 BERTScore: Семантическая оценка}
+
+\textbf{Алгоритм:} \\
+BERTScore использует эмбеддинги BERT для сравнения текстов через косинусную близость.
+
+\textbf{Применение:}
+
+    
+- Популярен для Java/Python.
+    
+- Корреляция с оценками разработчиков — 0.78 (Feng et al., 2023) [[5]].
+
+
+\textbf{Сильные стороны:} \\
+Улавливает семантическую эквивалентность (например, "add element" vs "insert item").
+
+\textbf{Слабые стороны:}
+
+    
+- Высокие вычислительные затраты.
+    
+- Зависит от качества предобученной модели.
+
+
+\section*{Тренды и будущее}
+
+\textbf{Актуальность в 2024:}
+
+    
+- Гибридные метрики (CodeBLEU + BERTScore) становятся стандартом.
+    
+- Ручная оценка разработчиками сохраняется.
+
+
+\textbf{Проблемы:}
+\begin{enumerate}
+    \item Несовершенство эталонов (например, CodeSearchNet).
+    \item Языковая зависимость (Python vs Go).
+\end{enumerate}
+
+\textbf{Будущее:}
+\begin{enumerate}
+    \item Метрики на основе LLM (ChatGPT, GPT-4).
+    \item Динамические бенчмарки (CodeXGLUE Evolved).
+\end{enumerate}
+
+\section*{Заключение}
+
+\textbf{Хорошие результаты:}
+
+    
+- BLEU-4 >25 (Python), >20 (C++).
+    
+- CodeBLEU >35 (мультиязычные задачи).
+    
+- BERTScore >0.7.
+
+
+\textbf{Плохие результаты:}
+
+    
+- BLEU <15 или ROUGE-L <0.2.
+
+
+Метрики развиваются вместе с моделями (CodeLlama, StarCoder). В будущем возможны метрики для оценки безопасности кода и эффективности алгоритмов.
+
+\section*{Ссылки}
+\begin{enumerate}
+    \item Ren, S., et al. "CodeBLEU: A Method for Evaluating the Quality of Code Summarization." ICSE (2021).
+    \item Zhang, T., et al. "BERTScore: Evaluating Text Generation with BERT." arXiv:1904.09675 (2020).
+    \item https://habr.com/ru/articles/745642/
+    \item https://github.com/google-research/bleurt
+    \item Feng et al. (2023) — исследование по BERTScore.
+    \item Husain et al. (2019) — работа по ROUGE для Go.
+\end{enumerate}
